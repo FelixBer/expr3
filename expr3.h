@@ -523,6 +523,8 @@ protected:
     std::string expr;
 
 public:
+    using value_type = integer_type;
+
     expr3() = default;
     expr3(const std::string& expression)
     {
