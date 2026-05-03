@@ -66,7 +66,7 @@ namespace {
             if(idx != str.size())
                 return 0;
             return r;
-        } catch(const std::exception& ex) {
+        } catch(const std::exception&) {
             if(ok)
                 *ok = false;
             return 0;
@@ -97,7 +97,7 @@ namespace {
             if(ok)
                 *ok = true;
             return d;
-        } catch(const std::exception& ex) {
+        } catch(const std::exception&) {
             if(ok)
                 *ok = false;
             return 0.0;
@@ -110,7 +110,8 @@ namespace {
       constexpr unsigned int num_bits {sizeof(T) * 8};
       constexpr unsigned int count_mask {num_bits - 1};
       const unsigned int mb {b & count_mask};
-      return ((v << mb) | (v >> (-mb & count_mask)));
+      const unsigned int rmb {(num_bits - mb) & count_mask};
+      return ((v << mb) | (v >> rmb));
     }
     template <typename T>
     T rotr (T v, unsigned int b)
@@ -118,7 +119,8 @@ namespace {
       constexpr unsigned int num_bits {sizeof(T) * 8};
       constexpr unsigned int count_mask {num_bits - 1};
       const unsigned int mb {b & count_mask};
-      return ((v >> mb) | (v << (-mb & count_mask)));
+      const unsigned int rmb {(num_bits - mb) & count_mask};
+      return ((v >> mb) | (v << rmb));
     }
     std::string tolower(std::string str)
     {
