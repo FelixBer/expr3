@@ -419,12 +419,12 @@ public:
             case Type::op_cmd_shl:          return Token(t, "<<",    7, left);
             case Type::op_cmd_rol:          return Token(t, "<<<",   7, left);
             case Type::op_cmd_small:        return Token(t, "<",     9, left);
-            case Type::op_cmd_smalleq:      return Token(t, "<=",    9, right);
+            case Type::op_cmd_smalleq:      return Token(t, "<=",    9, left);
 
             case Type::op_cmd_shr:          return Token(t, ">>",    7, left);
             case Type::op_cmd_ror:          return Token(t, ">>>",   7, left);
             case Type::op_cmd_big:          return Token(t, ">",     9, left);
-            case Type::op_cmd_bigeq:        return Token(t, ">=",    9, right);
+            case Type::op_cmd_bigeq:        return Token(t, ">=",    9, left);
 
             case Type::op_assign:           return Token(t, "=",    16, right);
             case Type::op_cmd_assign_shl:   return Token(t, "<<=",  16, right);
