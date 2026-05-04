@@ -1128,8 +1128,8 @@ public:
             case Token::Type::op_binary_xor:       return static_cast<integer_type>(static_cast<uint64_t>(li) ^ static_cast<uint64_t>(ri));
             case Token::Type::op_equal:            return li == ri;
             case Token::Type::op_not_equal:        return li != ri;
-            case Token::Type::op_bin_not:          return static_cast<integer_type>(~static_cast<uint64_t>(li));
-            case Token::Type::op_logical_not:      return !li;
+            case Token::Type::op_bin_not:          return static_cast<integer_type>(~static_cast<uint64_t>(ri));
+            case Token::Type::op_logical_not:      return !ri;
             case Token::Type::op_plus:             return li +  ri;
             case Token::Type::op_minus:            return li -  ri;
             case Token::Type::op_div:              return li /  ri;
