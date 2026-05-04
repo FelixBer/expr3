@@ -95,7 +95,7 @@ namespace {
             long double d = 0.0;
             ss >> d;
             if(ok)
-                *ok = true;
+                *ok = !ss.fail() && ss.eof();
             return d;
         } catch(const std::exception&) {
             if(ok)
