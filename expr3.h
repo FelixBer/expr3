@@ -875,6 +875,10 @@ public:
             {
                 output.push_back(tok);
             }
+            else if(tok.type == Token::Type::StrConstant)
+            {
+                output.push_back(tok);
+            }
             else if(tok.type == Token::Type::comma)
             {
                 while(stack.size() && stack.back().type != Token::Type::left_round_brace)
