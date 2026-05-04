@@ -5,7 +5,8 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
-#include <cmath> //std::fmod
+#include <cmath>   //std::fmod, std::isinf, std::isnan
+#include <limits>  //std::numeric_limits
 
 /*
   Implements and expression evaluatoin engine with the shunting yard algorithm.
@@ -52,6 +53,8 @@ namespace {
     }
     std::string double_as_str(long double val)
     {
+        if(std::isinf(val)) return val > 0 ? "inf" : "-inf";
+        if(std::isnan(val)) return "nan";
         std::stringstream stream;
         stream << std::fixed << val;
         return stream.str();
@@ -368,10 +371,19 @@ public:
     bool is_double(double* out = nullptr) const
     {
         const std::string low = tolower(str);
-        bool ok1 = (str.find('.') != std::string::npos)
-                || (low == "inf") || (low == "-inf") || (low == "+inf")
-                || (low == "nan") || (low == "-nan") || (low == "+nan")
-                || (low == "infinity") || (low == "-infinity");
+        if(low == "inf" || low == "+inf" || low == "infinity") {
+            if(out) *out =  std::numeric_limits<double>::infinity();
+            return true;
+        }
+        if(low == "-inf" || low == "-infinity") {
+            if(out) *out = -std::numeric_limits<double>::infinity();
+            return true;
+        }
+        if(low == "nan" || low == "+nan" || low == "-nan") {
+            if(out) *out =  std::numeric_limits<double>::quiet_NaN();
+            return true;
+        }
+        bool ok1 = (str.find('.') != std::string::npos);
         bool ok2;
         auto val = str_as_double(str, &ok2);
         if(out)
