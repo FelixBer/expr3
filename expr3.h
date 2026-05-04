@@ -676,13 +676,17 @@ public:
                     case ']': add_operator(Token::Type::right_edge_brace);  break;
                     case ',': add_operator(Token::Type::comma);             break;
                     case '|':
-                        if(peek_grab_char_if(i, '='))
+                        if(peek_grab_char_if(i, '|'))
+                            add_operator(Token::Type::op_logical_or);
+                        else if(peek_grab_char_if(i, '='))
                             add_operator(Token::Type::op_assign_binary_or); // |=
                         else
                             add_operator(Token::Type::op_binary_or);
                         break;
                     case '&':
-                        if(peek_grab_char_if(i, '='))
+                        if(peek_grab_char_if(i, '&'))
+                            add_operator(Token::Type::op_logical_and);
+                        else if(peek_grab_char_if(i, '='))
                             add_operator(Token::Type::op_assign_binary_and); // &=
                         else
                             add_operator(Token::Type::op_binary_and);
