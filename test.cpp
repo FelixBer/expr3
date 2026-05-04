@@ -158,11 +158,6 @@ static void test_unary_float()
     check_near(ef("!5.0"), 0.0, "float !5.0");
     check_near(ef("!0.0"), 1.0, "float !0.0");
 
-    double bitnot_1 = ef("~1.0");
-    double bitnot_expected = static_cast<double>(~static_cast<uint64_t>(1));
-    std::cout << "  [INFO] float ~1.0 => " << bitnot_1
-              << "  expected=" << bitnot_expected
-              << " (LSB difference undetectable as double)\n";
 }
 
 // BUG #1 (fixed): && and || were never produced by the tokenizer
