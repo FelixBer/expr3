@@ -1075,9 +1075,13 @@ public:
             case Token::Type::op_logical_not:      return !ri;
             case Token::Type::op_plus:             return li +  ri;
             case Token::Type::op_minus:            return li -  ri;
-            case Token::Type::op_div:              return li /  ri;
+            case Token::Type::op_div:
+                if(ri == 0) return Token::make_error("Division by zero.");
+                return li / ri;
             case Token::Type::op_mul:              return li *  ri;
-            case Token::Type::op_remainder:        return li %  ri;
+            case Token::Type::op_remainder:
+                if(ri == 0) return Token::make_error("Division by zero.");
+                return li % ri;
             case Token::Type::op_cmd_small:        return li <  ri;
             case Token::Type::op_cmd_shl:          return static_cast<integer_type>(static_cast<uint64_t>(li) << static_cast<uint64_t>(ri));
             case Token::Type::op_cmd_rol:          return static_cast<integer_type>(rotl(static_cast<uint64_t>(li), static_cast<unsigned int>(ri)));

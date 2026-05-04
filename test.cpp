@@ -312,7 +312,11 @@ static void test_division_by_zero()
     std::cout << "\n=== Division by Zero ===\n";
     check(std::isinf(ef("1.0/0.0")), "1.0/0.0 == inf");
     check(std::isnan(ef("5.0%0.0")), "5.0%0.0 == nan (fmod)");
-    std::cout << "  [SKIP] integer 1/0 is UB — not tested\n";
+    bool ok;
+    eu("1/0", &ok);
+    check(!ok, "integer 1/0 returns error");
+    eu("5%0", &ok);
+    check(!ok, "integer 5%0 returns error");
 }
 
 // BUG #8 (fixed): set_from_string returned Token(data.empty())
