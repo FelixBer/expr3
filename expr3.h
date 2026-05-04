@@ -367,7 +367,7 @@ public:
 
     bool is_double(double* out = nullptr) const
     {
-        bool ok1 = (str.find('.') != std::string::npos) || (str.find(',') != std::string::npos);
+        bool ok1 = (str.find('.') != std::string::npos);
         bool ok2;
         auto val = str_as_double(str, &ok2);
         if(out)
