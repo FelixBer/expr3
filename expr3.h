@@ -367,11 +367,15 @@ public:
 
     bool is_double(double* out = nullptr) const
     {
-        bool ok1 = (str.find('.') != std::string::npos);
+        const std::string low = tolower(str);
+        bool ok1 = (str.find('.') != std::string::npos)
+                || (low == "inf") || (low == "-inf") || (low == "+inf")
+                || (low == "nan") || (low == "-nan") || (low == "+nan")
+                || (low == "infinity") || (low == "-infinity");
         bool ok2;
         auto val = str_as_double(str, &ok2);
         if(out)
-            *out = val; //even if conversion failed, we set it to 0.0
+            *out = val;
         return ok1 && ok2;
     }
 
