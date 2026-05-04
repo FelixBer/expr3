@@ -1099,8 +1099,12 @@ public:
             case Token::Type::op_assign_plus:        evaluated = li +  ri;  break;
             case Token::Type::op_assign_minus:       evaluated = li -  ri;  break;
             case Token::Type::op_assign_mul:         evaluated = li *  ri;  break;
-            case Token::Type::op_assign_div:         evaluated = li /  ri;  break;
-            case Token::Type::op_assign_remainder:   evaluated = li %  ri;  break;
+            case Token::Type::op_assign_div:
+                if(ri == 0) return Token::make_error("Division by zero.");
+                evaluated = li / ri;  break;
+            case Token::Type::op_assign_remainder:
+                if(ri == 0) return Token::make_error("Division by zero.");
+                evaluated = li % ri;  break;
             case Token::Type::op_assign_binary_and:  evaluated = li &  ri;  break;
             case Token::Type::op_assign_binary_or:   evaluated = li |  ri;  break;
             case Token::Type::op_assign_binary_xor:  evaluated = li ^  ri;  break;
