@@ -843,7 +843,7 @@ public:
         std::vector<Token> stack, output;
         stack.reserve(tokens.size());
         output.reserve(tokens.size());
-        uint err=0;
+        unsigned int err=0;
 
         for(const auto& tok : tokens)
         {
@@ -928,7 +928,7 @@ public:
     static Token eval(const std::vector<Token>& expr, expr_eval_context* context)
     {
         std::vector<Token> stack;
-        uint err=0;
+        unsigned int err=0;
 
         for(const auto& tok : expr)
         {
