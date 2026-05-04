@@ -545,7 +545,9 @@ public:
             data.clear();
             return r;
         }
-        return data.empty();
+        if(data.empty())
+            return Token::make_error("Empty expression.");
+        return {};
     }
 
     std::string intermediate_repr() const
