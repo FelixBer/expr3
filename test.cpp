@@ -380,6 +380,116 @@ static void test_intermediate_repr()
     check_eq(e.intermediate_repr(), std::string("1 2 + 3 * "), "\"(1+2)*3\" RPN");
 }
 
+static void test_unary_chain()
+{
+    std::cout << "\n=== Unary Operator Chains ===\n";
+    check_eq(es("---5"),  -5LL,  "---5 == -5");
+    check_eq(es("----5"),  5LL,  "----5 == 5");
+    check_eq(eu("!!!1"),   0ULL, "!!!1 == 0");
+    check_eq(eu("!!!0"),   1ULL, "!!!0 == 1");
+}
+
+static void test_nested_functions()
+{
+    std::cout << "\n=== Nested Functions ===\n";
+    check_eq(eu("min(max(1,3),2)"), 2ULL, "min(max(1,3),2)");
+    check_eq(eu("max(min(1,3),2)"), 2ULL, "max(min(1,3),2)");
+    check_eq(eu("min(max(2,5),max(1,3))"), 3ULL, "min(max(2,5),max(1,3))");
+}
+
+static void test_rotate_assign()
+{
+    std::cout << "\n=== Rotate-Assign Operators ===\n";
+    MapContext ctx;
+    expr3u e;
+    bool ok;
+
+    ctx.vars["x"] = 1;
+    e.set_from_string("x<<<=3");
+    e.eval(&ok, &ctx);
+    check(ok, "x<<<=3 ok");
+    check_eq(ctx.vars["x"], 8ULL, "x=1; x<<<=3 == 8");
+
+    ctx.vars["x"] = 1;
+    e.set_from_string("x>>>=1");
+    e.eval(&ok, &ctx);
+    check(ok, "x>>>=1 ok");
+    check_eq(ctx.vars["x"], 0x8000000000000000ULL, "x=1; x>>>=1 == MSB");
+}
+
+static void test_assign_div_by_zero()
+{
+    std::cout << "\n=== Assign Op Division by Zero ===\n";
+    MapContext ctx;
+    expr3u e;
+    bool ok;
+
+    ctx.vars["x"] = 10;
+    e.set_from_string("x/=0");
+    e.eval(&ok, &ctx);
+    check(!ok, "integer x/=0 returns error");
+
+    ctx.vars["x"] = 10;
+    e.set_from_string("x%=0");
+    e.eval(&ok, &ctx);
+    check(!ok, "integer x%=0 returns error");
+}
+
+// BUG: max/min return Token(false)==Token(0) (valid Number!) instead of an error
+static void test_function_wrong_arity()
+{
+    std::cout << "\n=== Function Wrong Arity (Bug: silently returns 0) ===\n";
+    bool ok;
+    eu("max(1)", &ok);
+    check(!ok, "max(1) returns error");
+    eu("min(1)", &ok);
+    check(!ok, "min(1) returns error");
+    eu("max()", &ok);
+    check(!ok, "max() returns error");
+}
+
+// BUG: float %=3.1 casts both operands to uint64_t and uses integer %, not fmod
+static void test_float_assign_remainder()
+{
+    std::cout << "\n=== Float Assign Remainder (Bug: int% instead of fmod) ===\n";
+
+    class FloatMapCtx : public expr_eval_context {
+    public:
+        std::map<std::string, double> vars;
+        Token resolve_var_if_needed(const Token& t) override {
+            if (t.type == Token::Type::Number && !t.is_integer() && !t.is_double()) {
+                auto it = vars.find(t.str);
+                if (it != vars.end())
+                    return Token(it->second);
+            }
+            return t;
+        }
+        bool assign(const Token& dest, const Token& val) override {
+            if (dest.type == Token::Type::Number && !dest.is_integer() && !dest.is_double())
+                vars[dest.str] = val.as_double();
+            return true;
+        }
+        Token exec_function(const Token&, std::vector<Token>&) override { return {}; }
+    } ctx;
+
+    ctx.vars["x"] = 5.3;
+    expr3f e("x%=3.1");
+    bool ok;
+    e.eval(&ok, &ctx);
+    check(ok, "float x%=3.1 ok");
+    check_near(ctx.vars["x"], std::fmod(5.3, 3.1), "float x%=3.1 uses fmod");
+}
+
+// BUG: <= and >= are right-associative in create_from_type, but < and > are left-associative
+static void test_comparison_associativity()
+{
+    std::cout << "\n=== Comparison Associativity (Bug: <= and >= are right-assoc) ===\n";
+    // C++: 3<=4<=5 is (3<=4)<=5 = 1<=5 = 1
+    check_eq(eu("3<=4<=5"), 1ULL, "3<=4<=5 == 1 (left-assoc)");
+    // C++: 5>=4>=3 is (5>=4)>=3 = 1>=3 = 0
+    check_eq(eu("5>=4>=3"), 0ULL, "5>=4>=3 == 0 (left-assoc)");
+}
+
 // ---------------------------------------------------------------------------
 
 int main()
@@ -390,16 +500,23 @@ int main()
     test_bitwise();
     test_shifts_and_rotates();
     test_unary_integer();
+    test_unary_chain();
     test_unary_float();
     test_logical();
     test_comparisons();
+    test_comparison_associativity();
     test_float_arithmetic();
+    test_float_assign_remainder();
     test_functions();
+    test_nested_functions();
+    test_function_wrong_arity();
     test_variables();
     test_assignment_ops();
+    test_rotate_assign();
     test_signed_arithmetic();
     test_str_as_double();
     test_division_by_zero();
+    test_assign_div_by_zero();
     test_set_from_string_return();
     test_is_integer_base();
     test_error_handling();
