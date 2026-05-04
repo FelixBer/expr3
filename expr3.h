@@ -877,7 +877,7 @@ public:
                           || stack.back().type == Token::Type::Function)
                       && (stack.back().type != Token::Type::left_round_brace))
                 {
-                    if(tok.is_op_unary() && stack.back().is_op_binary()) //a unary operator never pops a binary one!
+                    if(tok.is_op_unary()) //a unary operator never pops anything
                         break;
                     output.push_back(stack.back());
                     stack.pop_back();
