@@ -490,7 +490,7 @@ public:
         else if(func.str == "max")
         {
             if(args.size() < 2)
-                return false;
+                return Token::make_error("max requires 2 arguments.");
 
             Token op1 = args[0];
             Token op2 = args[1];
@@ -505,7 +505,7 @@ public:
         else if(func.str == "min")
         {
             if(args.size() < 2)
-                return false;
+                return Token::make_error("min requires 2 arguments.");
 
             Token op1 = args[0];
             Token op2 = args[1];
