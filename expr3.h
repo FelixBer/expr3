@@ -1179,7 +1179,7 @@ public:
             case Token::Type::op_assign_minus:       evaluated = li -  ri;  break;
             case Token::Type::op_assign_mul:         evaluated = li *  ri;  break;
             case Token::Type::op_assign_div:         evaluated = li /  ri;  break;
-            case Token::Type::op_assign_remainder:   evaluated = static_cast<integer_type>(static_cast<uint64_t>(li) % static_cast<uint64_t>(ri));  break;
+            case Token::Type::op_assign_remainder:   evaluated = std::fmod(li, ri);  break;
             case Token::Type::op_assign_binary_and:  evaluated = static_cast<integer_type>(static_cast<uint64_t>(li) & static_cast<uint64_t>(ri));  break;
             case Token::Type::op_assign_binary_or:   evaluated = static_cast<integer_type>(static_cast<uint64_t>(li) | static_cast<uint64_t>(ri));  break;
             case Token::Type::op_assign_binary_xor:  evaluated = static_cast<integer_type>(static_cast<uint64_t>(li) ^ static_cast<uint64_t>(ri));  break;
