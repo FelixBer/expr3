@@ -1061,8 +1061,8 @@ public:
             case Token::Type::op_mul:              return li *  ri;
             case Token::Type::op_remainder:        return li %  ri;
             case Token::Type::op_cmd_small:        return li <  ri;
-            case Token::Type::op_cmd_shl:          return li << ri;
-            case Token::Type::op_cmd_rol:          return rotl(li, ri);
+            case Token::Type::op_cmd_shl:          return static_cast<integer_type>(static_cast<uint64_t>(li) << static_cast<uint64_t>(ri));
+            case Token::Type::op_cmd_rol:          return static_cast<integer_type>(rotl(static_cast<uint64_t>(li), static_cast<unsigned int>(ri)));
             case Token::Type::op_cmd_smalleq:      return li <= ri;
             case Token::Type::op_cmd_big:          return li >  ri;
             case Token::Type::op_cmd_shr:          return li >> ri;
@@ -1070,8 +1070,8 @@ public:
             case Token::Type::op_cmd_bigeq:        return li >= ri;
 
             case Token::Type::op_assign:             evaluated = ri;        break;
-            case Token::Type::op_cmd_assign_shl:     evaluated = li << ri;  break;
-            case Token::Type::op_cmd_assign_rol:     evaluated = rotl(li, ri);  break;
+            case Token::Type::op_cmd_assign_shl:     evaluated = static_cast<integer_type>(static_cast<uint64_t>(li) << static_cast<uint64_t>(ri));  break;
+            case Token::Type::op_cmd_assign_rol:     evaluated = static_cast<integer_type>(rotl(static_cast<uint64_t>(li), static_cast<unsigned int>(ri)));  break;
             case Token::Type::op_cmd_assign_shr:     evaluated = li >> ri;  break;
             case Token::Type::op_cmd_assign_ror:     evaluated = rotr(li, ri);  break;
             case Token::Type::op_assign_plus:        evaluated = li +  ri;  break;
