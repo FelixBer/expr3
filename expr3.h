@@ -1011,6 +1011,15 @@ public:
                         return Token::make_error("Stack depth error on unary operator.");
                     }
 
+                    if(tok.type != Token::Type::op_plus        &&
+                       tok.type != Token::Type::op_minus       &&
+                       tok.type != Token::Type::op_logical_not &&
+                       tok.type != Token::Type::op_bin_not)
+                    {
+                        err |= error_type::operator_mismatch;
+                        return Token::make_error("Operator cannot be used as unary.");
+                    }
+
                     const Token right = stack.back();
                     const Token left = {};
                     stack.pop_back();
