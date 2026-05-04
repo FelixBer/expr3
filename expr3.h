@@ -5,8 +5,9 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
-#include <cmath>   //std::fmod, std::isinf, std::isnan
-#include <limits>  //std::numeric_limits
+#include <cmath>    //std::fmod, std::isinf, std::isnan
+#include <limits>   //std::numeric_limits
+#include <iomanip>  //std::setprecision
 
 /*
   Implements and expression evaluatoin engine with the shunting yard algorithm.
@@ -56,7 +57,7 @@ namespace {
         if(std::isinf(val)) return val > 0 ? "inf" : "-inf";
         if(std::isnan(val)) return "nan";
         std::stringstream stream;
-        stream << std::fixed << val;
+        stream << std::fixed << std::setprecision(std::numeric_limits<long double>::max_digits10) << val;
         return stream.str();
     }
     uint64_t str_as_u64(const std::string& str, bool* ok, int base)
