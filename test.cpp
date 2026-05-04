@@ -287,7 +287,7 @@ static void test_variables()
     expr3f ef2("pi");
     double pi_val = ef2.eval(&ok);
     check(ok, "pi ok");
-    check_near(pi_val, 3.141593, "pi value"); // double_as_str uses std::fixed precision 6
+    check_near(pi_val, 3.1415926535, "pi value");
 }
 
 static void test_assignment_ops()
@@ -525,18 +525,18 @@ static void test_unary_plus()
     check_near(ef("+3.5"), 3.5, "+3.5 (float)");
 }
 
-// BUG #2: is_double requires '.' in string; "1e10" (no dot) is treated as hex 0x1e10.
-// Additionally, the tokenizer splits "2.0e-1" into tokens ["2.0e", -, "1"] at the '-'.
+// The tokenizer splits "2.0e-1" into tokens ["2.0e", -, "1"] at the '-' (remaining limitation).
 static void test_scientific_notation()
 {
     std::cout << "\n=== Scientific Notation ===\n";
-    // positive-exponent forms (no sign) are tokenized correctly and parse as float
+    // positive-exponent forms work
     check_near(ef("1.0e2"),  100.0, "1.0e2 == 100.0");
     check_near(ef("1.5e2"),  150.0, "1.5e2 == 150.0");
-    // negative-exponent form: tokenizer splits at '-'; "2.0e" is unknown var (→0), minus 1 = -1
-    check_near(ef("2.0e-1"), -1.0, "2.0e-1 tokenized as (2.0e)-(1) == -1 (limitation)");
-    // "1e10" has no dot: is_double() returns false; parsed as hex integer 0x1e10 = 7696
-    check_eq(eu("1e10"), 0x1e10ULL, "\"1e10\" parsed as hex 0x1e10 (not sci-notation)");
+    // Bug #2 fixed: "1e10" (no dot) now recognized as sci-notation, not hex 0x1e10
+    check_near(ef("1e10"), 1e10,           "\"1e10\" parsed as sci-notation (fixed)");
+    check_eq(eu("1e10"),   10000000000ULL,  "eu(\"1e10\") == 10^10 as integer (fixed)");
+    // negative-exponent still broken: tokenizer splits "2.0e-1" at '-'
+    check_near(ef("2.0e-1"), -1.0, "2.0e-1 tokenized as (2.0e)-(1) == -1 (tokenizer limitation)");
 }
 
 // BUG #2: is_double() requires '.' in the string; pure scientific notation ("1e10") returns false
@@ -551,14 +551,11 @@ static void test_is_double_sci_notation()
     check_eq(t_dot.is_double(), true, "is_double(\"1.0e10\") == true (has dot)");
 }
 
-// BUG #1: double_as_str uses std::fixed precision 6; intermediate results lose precision
+// BUG #1 (fixed): double_as_str now uses max_digits10; intermediate precision is preserved
 static void test_float_precision_loss()
 {
-    std::cout << "\n=== Float Intermediate Precision (Bug: 6-digit storage) ===\n";
-    // 1.0/3.0 is stored as Token("0.333333"); 0.333333*3.0 = 0.999999, not 1.0
-    double result = ef("1.0/3.0*3.0");
-    check(std::abs(result - 1.0) < 1e-5, "1.0/3.0*3.0 within 1e-5 of 1.0");
-    check(std::abs(result - 1.0) > 1e-7, "1.0/3.0*3.0 precision loss > 1e-7 (confirms bug)");
+    std::cout << "\n=== Float Intermediate Precision (fixed) ===\n";
+    check_near(ef("1.0/3.0*3.0"), 1.0, "1.0/3.0*3.0 == 1.0 (precision preserved)");
 }
 
 static void test_float_comparisons()
@@ -702,21 +699,38 @@ static void test_nested_parens()
     check_eq(eu("((2+3)*(4+5))"), 45ULL, "((2+3)*(4+5))");
 }
 
-// BUG #4: StrConstant tokens are silently dropped by shunting_yard
+// StrConstant is pushed through the RPN pipeline so functions can receive string args.
 static void test_string_literal()
 {
-    std::cout << "\n=== String Literal Handling (Bug: silently dropped) ===\n";
+    std::cout << "\n=== String Literal Handling ===\n";
     expr3u e;
     bool ok;
 
-    // a bare string literal: shunting_yard drops it → empty output → parse error
+    // bare string: parses fine, but eval returns success=false (not a Number)
     Token r = e.set_from_string("\"hello\"");
-    check(r.is_error(), "\"hello\" alone is a parse error");
-
-    // string mixed with operators: StrConstant dropped → stack imbalance at eval
-    e.set_from_string("1+\"hello\"");
+    check(!r.is_error(), "\"hello\" parses without error");
     e.eval(&ok);
-    check(!ok, "1+\"hello\" eval fails");
+    check(!ok, "\"hello\" eval success=false (not a number)");
+
+    // string as function argument: StrConstant reaches exec_function intact
+    class StrFuncCtx : public expr_eval_context {
+    public:
+        std::string received;
+        Token resolve_var_if_needed(const Token& t) override { return t; }
+        bool assign(const Token&, const Token&) override { return true; }
+        Token exec_function(const Token& func, std::vector<Token>& args) override {
+            if (func.str == "id" && !args.empty() && args[0].is_string()) {
+                received = args[0].str;
+                return Token::make_constant(1);
+            }
+            return {};
+        }
+    } ctx;
+
+    e.set_from_string("id(\"world\")");
+    e.eval(&ok, &ctx);
+    check(ok,                          "id(\"world\") ok");
+    check_eq(ctx.received, std::string("world"), "StrConstant arg reached exec_function");
 }
 
 // ---------------------------------------------------------------------------
