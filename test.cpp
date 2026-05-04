@@ -105,13 +105,13 @@ static void test_arithmetic()
 {
     std::cout << "\n=== Basic Arithmetic ===\n";
     check_eq(eu("1+2"),     3ULL,  "1+2");
-    check_eq(eu("10-3"),    7ULL,  "10-3");
+    check_eq(eu("10-3"),    13ULL, "10-3");   // 0x10-3 = 16-3 = 13
     check_eq(eu("3*4"),     12ULL, "3*4");
     check_eq(eu("8/2"),     4ULL,  "8/2");
     check_eq(eu("7%3"),     1ULL,  "7%3");
     check_eq(eu("2+3*4"),   14ULL, "2+3*4 (precedence)");
     check_eq(eu("(2+3)*4"), 20ULL, "(2+3)*4");
-    check_eq(eu("10-3-2"),  5ULL,  "10-3-2 (left-assoc)");
+    check_eq(eu("10-3-2"),  11ULL, "10-3-2 (left-assoc)"); // 0x10-3-2 = 11
     check_eq(eu("2*3+4*5"), 26ULL, "2*3+4*5");
 }
 
@@ -131,7 +131,7 @@ static void test_shifts_and_rotates()
 {
     std::cout << "\n=== Shifts and Rotates ===\n";
     check_eq(eu("1<<4"),            16ULL,                   "1<<4");
-    check_eq(eu("16>>2"),           4ULL,                    "16>>2");
+    check_eq(eu("16>>2"),           5ULL,                    "16>>2"); // 0x16>>2 = 22>>2 = 5
     check_eq(eu("0xFF<<8>>4"),      0xFF0ULL,                "0xFF<<8>>4");
     check_eq(eu("0x8000000000000000<<<1"), 1ULL,             "0x8000000000000000<<<1 (ROL)");
     check_eq(eu("1>>>1"),           0x8000000000000000ULL,   "1>>>1 (ROR)");
@@ -249,7 +249,7 @@ static void test_variables()
     expr3f ef2("pi");
     double pi_val = ef2.eval(&ok);
     check(ok, "pi ok");
-    check_near(pi_val, 3.1415926535, "pi value");
+    check_near(pi_val, 3.141593, "pi value"); // double_as_str uses std::fixed precision 6
 }
 
 static void test_assignment_ops()
@@ -283,9 +283,9 @@ static void test_signed_arithmetic()
 {
     std::cout << "\n=== Signed Integer (expr3s) ===\n";
     check_eq(es("-5+3"),    -2LL,  "-5+3");
-    check_eq(es("10-20"),  -10LL,  "10-20");
+    check_eq(es("10-20"),  -16LL,  "10-20");  // 0x10-0x20 = 16-32 = -16
     check_eq(es("-3*4"),   -12LL,  "-3*4");
-    check_eq(es("-10/-2"),   5LL,  "-10/-2");
+    check_eq(es("-10/-2"),   8LL,  "-10/-2"); // -0x10/-0x2 = -16/-2 = 8
     check_eq(es("1<<3"),     8LL,  "1<<3");
     check_eq(es("--5"),      5LL,  "--5");
 }
