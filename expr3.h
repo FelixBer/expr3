@@ -384,7 +384,9 @@ public:
             if(out) *out =  std::numeric_limits<double>::quiet_NaN();
             return true;
         }
-        bool ok1 = (str.find('.') != std::string::npos);
+        bool ok1 = (str.find('.') != std::string::npos)
+                || (str.find('e') != std::string::npos)
+                || (str.find('E') != std::string::npos);
         bool ok2;
         auto val = str_as_double(str, &ok2);
         if(out)
