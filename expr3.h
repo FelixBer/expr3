@@ -487,7 +487,7 @@ public:
                 size = 8; //todo: select right one...
             }
             auto adr = args.back().as_integer();
-            //memread(adr,tok.size)
+            (void)adr; //TODO: memread(adr,tok.size)
             return Token::make_constant(0x33333333);
         }
         else if(func.str == "max")
